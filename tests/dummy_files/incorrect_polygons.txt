@@ -1,0 +1,226 @@
+polygon
+f 1 2 3 4 5 6 7 8 9 g
+f 1.2.3
+f 1.2 2
+f 1
+f 1 2 3 -1
+f 1,2 3 4
+f 1111111111111111111111111 4,32
+f 0 2
+vf
+fg
+mfdknjlansdfd s s f
+f 1 2 3e-1
+f 1 2 3 f 4 6
+f1 2 3 
+f 1 2 3 
+f 1// 2//3 4//3
+f 1/2/ 2/3/ 4/2/
+f 1/0/2 1/2
+f 1/2.2 3/2
+f 1/2/0 1/2/1
+f 1/2/2.2 1/2
+f 1/2 1/0
+f -1 2 3
+f 1/1/2
+f 1/-1/2 1/2/3
+mum = (maximum > range_Z) ? maximum : range_Z;
+  maximum = (maximum == 0) ? 1 : maximum;
+
+  for (int i = 0; i < res->v->amount_vert; i++) {
+    res->v->coord[i].x =
+        (res->v->coord[i].x - res->v->minmaxX[0]) / maximum * 2 - 1;
+    res->v->coord[i].y =
+        (res->v->coord[i].y - res->v->minmaxY[0]) / maximum * 2 - 1;
+    res->v->coord[i].z =
+        (res->v->coord[i].z - res->v->minmaxZ[0]) / maximum * 2 - 1;
+  }
+  return maximum;
+}
+
+int parser(results* res, char* name_of_file) {
+  int error = 0;
+  FILE* obj_file;
+  char* line = NULL;
+  size_t len = 0;
+  ssize_t read;
+  obj_file = fopen(name_of_file, "r");
+  if (obj_file != NULL) {
+    while ((read = getline(&line, &len, obj_file)) != EOF) {
+      if ((line[0] == 'v') && (line[1] == ' ')) {
+        parse_v(line, res->v);
+      } else if ((line[0] == 'f') && (line[1] == ' ')) {
+        parse_f(line, res);
+      }
+    }
+    free(line);
+    fclose(obj_file);
+  } else {
+    error = 1;
+  }
+  return error;
+}
+
+int parse_v(char* line, vertex* vert) {
+  char* start = line + 2;
+  double x = 0;
+  double y = 0;
+  double z = 0;
+  x = strtod(start, &start);
+  if ((start != NULL) && (start[0] == ' ')) {
+    y = strtod(start, &start);
+    if ((start != NULL) && (start[0] == ' ')) {
+      char* end = start;
+      z = strtod(start, &start);
+      if (end != start) {
+        if ((start[0] == 0) || (start[0] == '\n')) {
+          add_vertex(x, y, z, vert);
+        } else {
+          end = start;
+          strtod(start, &start);
+          if ((end != start) && ((start[0] == 0) || (start[0] == '\n'))) {
+            add_vertex(x, y, z, vert);
+          }
+        }
+      }
+    }
+  }
+  return 1;
+}
+
+// Add new point to a structure, determine max and min values for all axes
+void add_vertex(double x, double y, double z, vertex* vert) {
+  vert->amount_vert++;
+  if (vert->minmaxX[0] > x) {
+    vert->minmaxX[0] = x;
+  }
+  if (vert->minmaxX[1] < x) {
+    vert->minmaxX[1] = x;
+  }
+  if (vert->minmaxY[0] > y) {
+    vert->minmaxY[0] = y;
+  }
+  if (vert->minmaxY[1] < y) {
+    vert->minmaxY[1] = y;
+  }
+  if (vert->minmaxZ[0] > z) {
+    vert->minmaxZ[0] = z;
+  }
+  if (vert->minmaxZ[1] < z) {
+    vert->minmaxZ[1] = z;
+  }
+  points p;
+  p.x = x;
+  p.y = y;
+  p.z = z;
+  vert->coord = realloc(vert->coord, (vert->amount_vert) * sizeof(p));
+  vert->coord[vert->amount_vert - 1] = p;
+}
+
+int parse_f(char* line, results* res) {
+  int error = 0;
+  double x;
+  char* start = line + 2;
+  polygon pol;
+  pol.amount_p = 0;
+  pol.p = (int*)malloc(0);
+  int check = 1;
+  while ((check == 1) && (error != 1)) {
+    char* end = start;
+    x = strtod(start, &start);
+    if (end != start) {
+      pol.amount_p++;
+      pol.p = (int*)realloc(pol.p, pol.amount_p * sizeof(int));
+      if (!pol.p) {
+        error = 1;
+      } else {
+        pol.p[pol.amount_p - 1] = x;
+      }
+    } else {
+      check = 0;
+    }
+    if (start[0] == '/') {
+      remove_symb(start, &start);
+    }
+  }
+  if ((start[0] == 0) || (start[0] == '\n')) {
+    res->amount_pols++;
+    res->p = realloc(res->p, res->amount_pols * sizeof(polygon));
+    res->p[res->amount_pols - 1] = pol;
+  }
+  return error;
+}
+
+int remove_symb(char* start, char** finish) {
+  start++;
+  double x = strtod(start, &start);
+  if (start[0] == '/') {
+    start++;
+    double x = strtod(start, &start);
+    if (start[0] == '/') {
+      start++;
+      x = strtod(start, &start);
+    }
+  }
+  *finish = start;
+  return 1;
+}
+
+void initialize(results* res, vertex* vert) {
+  res->amount_pols = 0;
+  res->amount_pols = 0;
+  res->p = (polygon*)malloc(0);
+  vert->amount_vert = 0;
+  vert->minmaxX[0] = INFINITY;
+  vert->minmaxY[0] = INFINITY;
+  vert->minmaxZ[0] = INFINITY;
+  vert->minmaxX[1] = -INFINITY;
+  vert->minmaxY[1] = -INFINITY;
+  vert->minmaxZ[1] = -INFINITY;
+  vert->coord = (points*)malloc(0);
+  res->v = vert;
+}
+
+int affine(results* res, double rotation_xy, double rotation_xz,
+           double rotation_yz, double translation_x, double translation_y,
+           double translation_z, double scaling) {
+  for (int i = 0; i < res->v->amount_vert; i++) {
+    if (scaling != 0) {
+      res->v->coord[i].x = res->v->coord[i].x * scaling;
+    }
+    if (scaling != 0) {
+      res->v->coord[i].y = res->v->coord[i].y * scaling;
+    }
+    if (scaling != 0) {
+      res->v->coord[i].z = res->v->coord[i].z * scaling;
+    }
+    if (translation_x != 0) {
+      res->v->coord[i].x = res->v->coord[i].x + translation_x;
+    }
+    if (translation_y != 0) {
+      res->v->coord[i].y = res->v->coord[i].y + translation_y;
+    }
+    if (translation_z != 0) {
+      res->v->coord[i].z = res->v->coord[i].z + translation_z;
+    }
+    if (rotation_xy != 0) {
+      res->v->coord[i].x = res->v->coord[i].x * cos(rotation_xy) +
+                           res->v->coord[i].y * sin(rotation_xy);
+      res->v->coord[i].y = -res->v->coord[i].x * sin(rotation_xy) +
+                           res->v->coord[i].y * cos(rotation_xy);
+    }
+    if (rotation_xz != 0) {
+      res->v->coord[i].x = res->v->coord[i].x * cos(rotation_xz) +
+                           res->v->coord[i].z * sin(rotation_xz);
+      res->v->coord[i].z = -res->v->coord[i].x * sin(rotation_xz) +
+                           res->v->coord[i].z * cos(rotation_xz);
+    }
+    if (rotation_yz != 0) {
+      res->v->coord[i].y = res->v->coord[i].y * cos(rotation_yz) +
+                           res->v->coord[i].z * sin(rotation_yz);
+      res->v->coord[i].z = -res->v->coord[i].y * sin(rotation_yz) +
+                           res->v->coord[i].z * cos(rotation_yz);
+    }
+  }
+
+  return 1;

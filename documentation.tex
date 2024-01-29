@@ -1,0 +1,62 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage[dvipsnames]{xcolor}
+\pagecolor{black}
+\usepackage[letterpaper]{geometry}
+\title{S21 CALCULATOR}
+\author{мишка подосинников}
+\date{August 2023}
+
+\begin{document}
+
+\color{white}
+\section*{\Huge\colorbox{Maroon}{ S21 3D VIEWER}}
+This project allows you to display format files .obj in the form of projections of 3D objects. The resulting image can be subjected to affine transformations, such as translation, rotation and scaling.
+
+To use the project, you need to install the {\color{CadetBlue}\textbf{make}} utility: further assembly is carried out through it, as well as the {\color{CadetBlue}\textbf{cmake}} utility.
+
+The possible targets of the {\color{CadetBlue}\textbf{make}} utility are listed in Table 1.
+
+\begin{table}[h!]
+    \color{white}
+    \centering
+    \begin{tabular}{| c | p{10cm} |}
+    \hline
+    
+     make command &  description  \\
+    \hline
+    \hline
+    make install &  compiles all the C and C++ code, installs the application under the name of VIEWER in {\color{Maroon}src/} folder \\
+   
+     make uninstall & removes application named VIEWER from {\color{Maroon}src/} folder \\
+    
+     make clean &  removes everything besides source files \\
+    
+   make dvi &  takes .tex files and transforms it to .dvi binary file. since .dvi file is hard to use, it then is being converted to .pdf \\
+   
+    make dist &  archives source code (the whole {\color{Maroon}src/} folder) into {\color{Maroon}s21\_viewer-1.0.tar.gz} file \\
+    
+     make test &  executes all tests and shows the number of checks, failures and errors. test files are stored in {\color{Maroon}src/tests/} folder. tests only support C code \\
+     make gcov\_report &  opens the report on coverage achieved by the tests \\
+
+    
+    \hline
+    \end{tabular}
+
+    \caption{All possible targets of make utility}
+    \label{tab1}
+\end{table}
+
+For this project's execution you're probably going to need some packages, installed with apt-get or brew. This is the extensive list of those packages for your consideration whether you want to use given application:
+
+\begin{itemize}
+  \item {\color{CadetBlue} texlive-latex-base}
+  \item {\color{CadetBlue} texlive-latex-recommended}
+  \item {\color{CadetBlue} cmake}
+  \item {\color{CadetBlue} qt6-base-dev}
+  \item {\color{CadetBlue} qt6-wayland}
+  \item {\color{CadetBlue} chromium}
+\end{itemize}
+Good luck!
+
+\end{document}
